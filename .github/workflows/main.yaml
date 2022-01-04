@@ -10,7 +10,7 @@ jobs:
       MY_SECRET   : ${{secrets.commit_secret}}
       USER_NAME   : Sheng
       USER_EMAIL  : qzwxsa1234@gmail.com
-      PUBLISH_DIR : ./dist
+      PUBLISH_DIR : ./out
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -27,6 +27,9 @@ jobs:
     - name: npm run build
       run: |
         npm run build
+    - name: npm run export
+      run: |
+        npm run export
     - name: Commit files
       run: |
         cd $PUBLISH_DIR
