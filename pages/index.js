@@ -1,9 +1,10 @@
-import TodoInput from '../component/todoInput';
-import TodoItem from '../component/todoItem'
-import { useState } from 'react';
+import gql from 'graphql-tag'
 import { Container, CssBaseline, List } from '@material-ui/core'
+import { useQuery } from '@apollo/client'
+import { initializeApollo } from '../apollo/client'
 import { makeStyles, ThemeProvider, createTheme } from '@material-ui/core/styles';
-import { blue, red } from '@material-ui/core/colors';
+import TodoItem from '../component/todoItem'
+import TodoInput from '../component/todoInput';
 
 const useStyles = makeStyles((theme) => ({
   todoTitle: {
@@ -26,9 +27,21 @@ const theme = createTheme({
   },
 });
 
+const TodoQuery = gql`
+  query TodoQuery {
+    todos {
+      id
+      note
+      complete
+    }
+  }
+`
+
 const Index = () => {
+  const {
+    data: { todos }
+  } = useQuery(TodoQuery)
   const classes = useStyles();
-  const [list, setList] = useState([])
 
   return (
     <ThemeProvider theme={theme}>
@@ -36,15 +49,14 @@ const Index = () => {
       <Container maxWidth="sm">
         <h1 className={classes.todoTitle}>Todo List</h1>
 
-        <TodoInput addTodo={setList} />
+        <TodoInput />
 
         <List className={classes.listWrapper}>
           {
-            list.map((item, index) => (
+            todos.map((item, index) => (
               <TodoItem
                 key={index}
                 item={item}
-                setList={setList}
               />
             ))
           }
@@ -52,6 +64,20 @@ const Index = () => {
       </Container>
     </ThemeProvider>
   )
+}
+
+export async function getStaticProps() {
+  const apolloClient = initializeApollo()
+
+  await apolloClient.query({
+    query: TodoQuery,
+  })
+
+  return {
+    props: {
+      initialApolloState: apolloClient.cache.extract(),
+    },
+  }
 }
 
 export default Index
