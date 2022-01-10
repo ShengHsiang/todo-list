@@ -1,6 +1,8 @@
 import { Button, ListItem, ListItemIcon, ListItemText, ListItemSecondaryAction, IconButton, Checkbox } from "@material-ui/core"
 import { makeStyles } from '@material-ui/core/styles';
 import DeleteIcon from '@material-ui/icons/Delete';
+import { useMutation } from '@apollo/client'
+import gql from 'graphql-tag'
 
 const useStyles = makeStyles((theme) => ({
   itemWrapper: {
@@ -19,8 +21,29 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const TodoItem = ({ item, setList }) => {
+const TOGGLE_TODO = gql`
+  mutation ToggleTodo($id: ID!) {
+    toggleTodo(id: $id) {
+      id
+      note
+      complete
+    }
+  }
+`
+
+const DELETE_TODO = gql`
+  mutation DeleteTodo($id: ID!) {
+    deleteTodo(id: $id) {
+      id
+    }
+  }
+`
+
+const TodoItem = ({ item }) => {
   const classes = useStyles();
+
+  const [toggleTodo] = useMutation(TOGGLE_TODO)
+  const [deleteTodo] = useMutation(DELETE_TODO)
 
   function handleDeleteItem() {
     setList(function (prev) {
@@ -28,15 +51,20 @@ const TodoItem = ({ item, setList }) => {
     })
   }
 
-  function handleToggleChecked() {
-    setList(function (prev) {
-      return prev.map(i => {
-        if (i.id === item.id) {
-          i.checked = !i.checked
-        }
-        return i
-      })
-    })
+  async function handleToggleChecked() {
+    try {
+      await toggleTodo({ variables: { id: item.id }, refetchQueries: ['TodoQuery'] })
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async function handleDeleteItem () {
+    try {
+      await deleteTodo({ variables: { id: item.id }, refetchQueries: ['TodoQuery'] })
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   return (
@@ -44,13 +72,13 @@ const TodoItem = ({ item, setList }) => {
       <ListItemIcon>
         <Checkbox
           edge="start"
-          checked={item.checked}
+          checked={item.complete}
           onChange={handleToggleChecked}
           tabIndex={-1}
           disableRipple
         />
       </ListItemIcon>
-      <ListItemText id={item.id} primary={item.note} className={item.checked ? classes.isCheck : ''} />
+      <ListItemText id={item.id} primary={item.note} className={item.complete ? classes.isCheck : ''} />
       <ListItemSecondaryAction>
         <IconButton edge="end" aria-label="comments" onClick={handleDeleteItem}>
           <DeleteIcon />

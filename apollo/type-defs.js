@@ -7,7 +7,20 @@ export const typeDefs = gql`
     status: String!
   }
 
+  type Todo {
+    id: ID!
+    note: String!
+    complete: Boolean!
+  }
+
   type Query {
     viewer: User
+    todos: [Todo]
+  }
+
+  type Mutation {
+    addTodo(id: ID!, note: String!): Todo
+    toggleTodo(id: ID!): Todo
+    deleteTodo(id: ID!): Todo
   }
 `
