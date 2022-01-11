@@ -1,10 +1,10 @@
-import gql from 'graphql-tag'
 import { Container, CssBaseline, List } from '@material-ui/core'
-import { useQuery } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client'
 import { initializeApollo } from '../apollo/client'
 import { makeStyles, ThemeProvider, createTheme } from '@material-ui/core/styles';
 import TodoItem from '../component/todoItem'
 import TodoInput from '../component/todoInput';
+import { TodoQuery, ADD_TODO, TOGGLE_TODO, DELETE_TODO } from './api/todo'
 
 const useStyles = makeStyles((theme) => ({
   todoTitle: {
@@ -27,21 +27,12 @@ const theme = createTheme({
   },
 });
 
-const TodoQuery = gql`
-  query TodoQuery {
-    todos {
-      id
-      note
-      complete
-    }
-  }
-`
-
 const Index = () => {
-  const {
-    data: { todos }
-  } = useQuery(TodoQuery)
   const classes = useStyles();
+  const { data: { todos } } = useQuery(TodoQuery)
+  const [addTodo] = useMutation(ADD_TODO)
+  const [toggleTodo] = useMutation(TOGGLE_TODO)
+  const [deleteTodo] = useMutation(DELETE_TODO)
 
   return (
     <ThemeProvider theme={theme}>
@@ -49,7 +40,7 @@ const Index = () => {
       <Container maxWidth="sm">
         <h1 className={classes.todoTitle}>Todo List</h1>
 
-        <TodoInput />
+        <TodoInput addTodo={addTodo} />
 
         <List className={classes.listWrapper}>
           {
@@ -57,6 +48,8 @@ const Index = () => {
               <TodoItem
                 key={index}
                 item={item}
+                toggleTodo={toggleTodo}
+                deleteTodo={deleteTodo}
               />
             ))
           }

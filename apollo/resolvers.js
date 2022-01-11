@@ -16,7 +16,6 @@ export const resolvers = {
       return { id: 1, name: 'John Smith', status: 'cached' }
     },
     todos(_parent, _args, _context, _info) {
-      console.log(_context)
       return todolists
     }
   },
