@@ -1,9 +1,7 @@
-import gql from 'graphql-tag'
 import { Button, TextField } from "@material-ui/core";
 import { makeStyles } from "@material-ui/core/styles";
 import { useState } from 'react';
 import { v4 } from 'uuid';
-import { useMutation } from '@apollo/client'
 
 const useStyles = makeStyles((theme) => ({
   wrapper: {
@@ -17,20 +15,9 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
 
-const ADD_TODO = gql`
-  mutation AddTodo($id: ID!, $note: String!) {
-    addTodo(id: $id, note: $note) {
-      id
-      note
-      complete
-    }
-  }
-`
-
-const TodoInput = () => {
+const TodoInput = ({ addTodo }) => {
   const classes = useStyles();
   const [note, setNote] = useState('');
-  const [addTodo] = useMutation(ADD_TODO)
 
   function noteChange(e) {
     setNote(e.target.value);
